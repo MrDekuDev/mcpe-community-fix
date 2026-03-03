@@ -5,6 +5,7 @@
 #include "../components/Button.h"
 #include "../components/SmallButton.h"
 #include "../components/ScrolledSelectionList.h"
+#include "../components/TextBox.h"
 #include "../../Minecraft.h"
 #include "../../../network/RakNetInstance.h"
 
@@ -21,7 +22,7 @@ class AvailableGamesList : public ScrolledSelectionList
 public:
 
 	AvailableGamesList(Minecraft* _minecraft, int _width, int _height)
-	:	ScrolledSelectionList(_minecraft, _width, _height, 24, _height - 30, 28)
+	:	ScrolledSelectionList(_minecraft, _width, _height, 24, _height - 70, 28)
 	{
 	}
 
@@ -62,10 +63,16 @@ public:
 	void buttonClicked(Button* button);
 
 	bool isInGameScreen();
+
+	void keyPressed(int key);
+	void keyboardNewChar(char inputChar);
+	void mouseClicked(int x, int y, int buttonNum);
+
 private:
 	Button bJoin;
 	Button bBack;
+	Button bConnect;
 	AvailableGamesList* gamesList;
+	TextBox* ipTextBox;
 };
-
-#endif /*NET_MINECRAFT_CLIENT_GUI_SCREENS__JoinGameScreen_H__*/
+#endif

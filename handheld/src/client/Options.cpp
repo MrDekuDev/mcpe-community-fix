@@ -55,7 +55,7 @@ void Options::initDefaultValues() {
 	keyBuild = KeyMapping("key.inventory", Keyboard::KEY_E);
 	keySneak = KeyMapping("key.sneak", Keyboard::KEY_LSHIFT);
 #ifndef RPI
-	keyCraft = KeyMapping("key.crafting", Keyboard::KEY_Q);
+	keyCraft = KeyMapping("key.crafting", Keyboard::KEY_I);
 	keyDrop  = KeyMapping("key.drop", Keyboard::KEY_Q);
 	keyChat  = KeyMapping("key.chat", Keyboard::KEY_T);
 	keyFog   = KeyMapping("key.fog", Keyboard::KEY_F);
@@ -185,7 +185,6 @@ const char* Options::GUI_SCALE[] = {
 
 void Options::update()
 {
-	viewDistance = 2;
 	StringVector optionStrings = optionsFile.getOptionStrings();
 	for (unsigned int i = 0; i < optionStrings.size(); i += 2) {
 		const std::string& key = optionStrings[i];
@@ -196,6 +195,10 @@ void Options::update()
 		// Multiplayer
 		if (key == OptionStrings::Multiplayer_Username) username = value;
 		if (key == OptionStrings::Multiplayer_ServerVisible) readBool(value, serverVisible);
+
+		// Audio
+		if (key == "music") readFloat(value, music);
+		if (key == "sound") readFloat(value, sound);
 
 		// Controls
         if (key == OptionStrings::Controls_Sensitivity) {
@@ -211,6 +214,9 @@ void Options::update()
 		}
 		if (key == OptionStrings::Controls_IsLefthanded) {
 			readBool(value, isLeftHanded);
+		}
+		if (key == OptionStrings::Controls_UseTouchScreen || key == "useTouchScreen") {
+			readBool(value, useTouchScreen);
 		}
 		if (key == OptionStrings::Controls_UseTouchJoypad) {
 			readBool(value, isJoyTouchArea);
@@ -234,6 +240,16 @@ void Options::update()
 				fancyGraphics = false;
 			}
 		}
+		if (key == "viewDistance") readInt(value, viewDistance);
+		if (key == "bobView") readBool(value, bobView);
+		if (key == "anaglyph3d") readBool(value, anaglyph3d);
+		if (key == "limitFramerate") readBool(value, limitFramerate);
+		if (key == "ambientOcclusion") readBool(value, ambientOcclusion);
+		if (key == "guiScale") readInt(value, guiScale);
+		if (key == "thirdPersonView") readBool(value, thirdPersonView);
+		if (key == "hideGui") readBool(value, hideGui);
+		if (key == "pixelsPerMillimeter") readFloat(value, pixelsPerMillimeter);
+
 		// Game
 		if (key == OptionStrings::Game_DifficultyLevel) {
 			readInt(value, difficulty);
@@ -293,9 +309,16 @@ void Options::load()
 void Options::save()
 {
 	StringVector stringVec;
-	// Game
+	// Multiplayer
+	addOptionToSaveOutput(stringVec, OptionStrings::Multiplayer_Username, username);
 	addOptionToSaveOutput(stringVec, OptionStrings::Multiplayer_ServerVisible, serverVisible);
+
+	// Game
 	addOptionToSaveOutput(stringVec, OptionStrings::Game_DifficultyLevel, difficulty);
+
+	// Audio
+	addOptionToSaveOutput(stringVec, "music", music);
+	addOptionToSaveOutput(stringVec, "sound", sound);
 
 	// Input
 	addOptionToSaveOutput(stringVec, OptionStrings::Controls_InvertMouse, invertYMouse);
@@ -304,63 +327,42 @@ void Options::save()
 	addOptionToSaveOutput(stringVec, OptionStrings::Controls_UseTouchScreen, useTouchScreen);
 	addOptionToSaveOutput(stringVec, OptionStrings::Controls_UseTouchJoypad, isJoyTouchArea);
 	addOptionToSaveOutput(stringVec, OptionStrings::Controls_FeedbackVibration, destroyVibration);
-// 
-// 	static const Option MUSIC;
-// 	static const Option SOUND;
-// 	static const Option INVERT_MOUSE;
-// 	static const Option SENSITIVITY;
-// 	static const Option RENDER_DISTANCE;
-// 	static const Option VIEW_BOBBING;
-// 	static const Option ANAGLYPH;
-// 	static const Option LIMIT_FRAMERATE;
-// 	static const Option DIFFICULTY;
-// 	static const Option GRAPHICS;
-// 	static const Option AMBIENT_OCCLUSION;
-// 	static const Option GUI_SCALE;
-// 
-// 	static const Option THIRD_PERSON;
-// 	static const Option HIDE_GUI;
-	//try {
-	//    PrintWriter pw = /*new*/ PrintWriter(/*new*/ FileWriter(optionsFile));
 
-	//    pw.println("music:" + music);
-	//    pw.println("sound:" + sound);
-	//    pw.println("invertYMouse:" + invertYMouse);
-	//    pw.println("mouseSensitivity:" + sensitivity);
-	//    pw.println("viewDistance:" + viewDistance);
-	//    pw.println("guiScale:" + guiScale);
-	//    pw.println("bobView:" + bobView);
-	//    pw.println("anaglyph3d:" + anaglyph3d);
-	//    pw.println("limitFramerate:" + limitFramerate);
-	//    pw.println("difficulty:" + difficulty);
-	//    pw.println("fancyGraphics:" + fancyGraphics);
-	//    pw.println("ao:" + ambientOcclusion);
-	//    pw.println("skin:" + skin);
-	//    pw.println("lastServer:" + lastMpIp);
+	// Graphics
+	addOptionToSaveOutput(stringVec, OptionStrings::Graphics_Fancy, fancyGraphics);
+	addOptionToSaveOutput(stringVec, "viewDistance", viewDistance);
+	addOptionToSaveOutput(stringVec, "bobView", bobView);
+	addOptionToSaveOutput(stringVec, "anaglyph3d", anaglyph3d);
+	addOptionToSaveOutput(stringVec, "limitFramerate", limitFramerate);
+	addOptionToSaveOutput(stringVec, "ambientOcclusion", ambientOcclusion);
+	addOptionToSaveOutput(stringVec, "guiScale", guiScale);
+	addOptionToSaveOutput(stringVec, "thirdPersonView", thirdPersonView);
+	addOptionToSaveOutput(stringVec, "hideGui", hideGui);
+	addOptionToSaveOutput(stringVec, "pixelsPerMillimeter", pixelsPerMillimeter);
 
-	//    for (int i = 0; i < keyMappings.length; i++) {
-	//        pw.println("key_" + keyMappings[i].name + ":" + keyMappings[i].key);
-	//    }
-
-	//    pw.close();
-	//} catch (Exception e) {
-	//    System.out.println("Failed to save options");
-	//    e.printStackTrace();
-	//}
+	// Save to file
+	optionsFile.save(stringVec);
 }
+
 void Options::addOptionToSaveOutput(StringVector& stringVector, std::string name, bool boolValue) {
 	std::stringstream ss;
-	ss << name << ":" << boolValue;
+	ss << name << "=" << boolValue;
 	stringVector.push_back(ss.str());
 }
 void Options::addOptionToSaveOutput(StringVector& stringVector, std::string name, float floatValue) {
 	std::stringstream ss;
-	ss << name << ":" << floatValue;
+	ss << name << "=" << floatValue;
 	stringVector.push_back(ss.str());
 }
 void Options::addOptionToSaveOutput(StringVector& stringVector, std::string name, int intValue) {
 	std::stringstream ss;
-	ss << name << ":" << intValue;
+	ss << name << "=" << intValue;
+	stringVector.push_back(ss.str());
+}
+
+void Options::addOptionToSaveOutput(StringVector& stringVector, std::string name, const std::string& stringValue) {
+	std::stringstream ss;
+	ss << name << "=" << stringValue;
 	stringVector.push_back(ss.str());
 }
 

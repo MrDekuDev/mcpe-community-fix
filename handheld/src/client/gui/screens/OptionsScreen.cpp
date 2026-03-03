@@ -131,35 +131,32 @@ void OptionsScreen::generateOptionScreens() {
 	optionPanes.push_back(new OptionsPane());
 	optionPanes.push_back(new OptionsPane());
 	// Mojang Pane
-	optionPanes[0]->createOptionsGroup("options.group.mojang")
-		//.addOptionItem(&Options::Option::THIRD_PERSON, minecraft);
-		.addOptionItem(&Options::Option::SENSITIVITY, minecraft);
-// 	int mojangGroup = optionPanes[0]->createOptionsGroup("Mojang");
-// 	static const int arr[] = {5,4,3,15};
-// 	std::vector<int> vec (arr, arr + sizeof(arr) / sizeof(arr[0]) );
-// 	optionPanes[0]->createStepSlider(minecraft, mojangGroup, "This works?", &Options::Option::DIFFICULTY, vec);
-// 
-// 	// Game Pane
-// 	int gameGroup = optionPanes[1]->createOptionsGroup("Game");
-// 	optionPanes[1]->createToggle(gameGroup, "Third person camera", &Options::Option::THIRD_PERSON);
-// 	optionPanes[1]->createToggle(gameGroup, "Server visible", &Options::Option::SERVER_VISIBLE);
-// 	
-// 	// Input Pane
-// 	int controlsGroup = optionPanes[2]->createOptionsGroup("Controls");
-// 	optionPanes[2]->createToggle(controlsGroup, "Invert X-axis", &Options::Option::INVERT_MOUSE);
-// 	optionPanes[2]->createToggle(controlsGroup, "Lefty", &Options::Option::LEFT_HANDED);
-// 	optionPanes[2]->createToggle(controlsGroup, "Use touch screen", &Options::Option::USE_TOUCHSCREEN);
-// 	optionPanes[2]->createToggle(controlsGroup, "Split touch controls", &Options::Option::USE_TOUCH_JOYPAD);
-// 	int feedBackGroup = optionPanes[2]->createOptionsGroup("Feedback");
-// 	optionPanes[2]->createToggle(feedBackGroup, "Vibrate on destroy", &Options::Option::DESTROY_VIBRATION);
-// 
-// 	int graphicsGroup = optionPanes[3]->createOptionsGroup("Graphics");
-// 	optionPanes[3]->createProgressSlider(minecraft, graphicsGroup, "Gui Scale", &Options::Option::PIXELS_PER_MILLIMETER, 3, 4);
-// 	optionPanes[3]->createToggle(graphicsGroup, "Fancy Graphics", &Options::Option::INVERT_MOUSE);
-// 	optionPanes[3]->createToggle(graphicsGroup, "Fancy Skies", &Options::Option::INVERT_MOUSE);
-// 	optionPanes[3]->createToggle(graphicsGroup, "Animated water", &Options::Option::INVERT_MOUSE);
-// 	int experimentalGraphicsGroup = optionPanes[3]->createOptionsGroup("Experimental graphics");
-// 	optionPanes[3]->createToggle(experimentalGraphicsGroup, "Soft shadows", &Options::Option::INVERT_MOUSE);
+	optionPanes[0]->createOptionsGroup("Mojang");
+	optionPanes[0]->createProgressSlider(minecraft, 0, "Sensitivity", &Options::Option::SENSITIVITY, 0.0f, 1.0f);
+	
+	// Game Pane
+	optionPanes[1]->createOptionsGroup("Game");
+	optionPanes[1]->createToggle(0, "Third person camera", &Options::Option::THIRD_PERSON);
+	optionPanes[1]->createToggle(0, "Server visible", &Options::Option::SERVER_VISIBLE);
+	optionPanes[1]->createToggle(0, "Hide GUI", &Options::Option::HIDE_GUI);
+	optionPanes[1]->createToggle(0, "Left-handed", &Options::Option::LEFT_HANDED);
+	
+	// Controls Pane
+	optionPanes[2]->createOptionsGroup("Controls");
+	optionPanes[2]->createToggle(0, "Invert mouse", &Options::Option::INVERT_MOUSE);
+	optionPanes[2]->createToggle(0, "Use touch screen", &Options::Option::USE_TOUCHSCREEN);
+	optionPanes[2]->createToggle(0, "Use touch joypad", &Options::Option::USE_TOUCH_JOYPAD);
+	optionPanes[2]->createOptionsGroup("Feedback");
+	optionPanes[2]->createToggle(1, "Vibrate on destroy", &Options::Option::DESTROY_VIBRATION);
+
+	// Graphics Pane
+	optionPanes[3]->createOptionsGroup("Graphics");
+	optionPanes[3]->createProgressSlider(minecraft, 0, "GUI Scale", &Options::Option::GUI_SCALE, 0.0f, 3.0f);
+	optionPanes[3]->createToggle(0, "Fancy graphics", &Options::Option::GRAPHICS);
+	optionPanes[3]->createToggle(0, "Ambient occlusion", &Options::Option::AMBIENT_OCCLUSION);
+	optionPanes[3]->createToggle(0, "View bobbing", &Options::Option::VIEW_BOBBING);
+	optionPanes[3]->createToggle(0, "Anaglyph 3D", &Options::Option::ANAGLYPH);
+	optionPanes[3]->createToggle(0, "Limit framerate", &Options::Option::LIMIT_FRAMERATE);
 }
 
 void OptionsScreen::mouseClicked( int x, int y, int buttonNum ) {

@@ -1,12 +1,16 @@
 #ifndef NET_MINECRAFT_CLIENT_SOUND__SoundEngine_H__
 #define NET_MINECRAFT_CLIENT_SOUND__SoundEngine_H__
 
-//package net.minecraft.client.sound;
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
 
 #if defined(ANDROID) && !defined(PRE_ANDROID23)
 	#include "../../platform/audio/SoundSystemSL.h"
 #elif defined(__APPLE__)
     #include "../../platform/audio/SoundSystemAL.h"
+#elif defined(WIN32)
+	#include "../../platform/audio/SoundSystemWin.h"
 #else
 	#include "../../platform/audio/SoundSystem.h"
 #endif
@@ -25,15 +29,15 @@ class SoundEngine
 		SoundSystemSL soundSystem;
     #elif defined(__APPLE__)
         SoundSystemAL soundSystem;
+	#elif defined(WIN32)
+	    SoundSystemWin soundSystem;
 	#else
 	    SoundSystem soundSystem;
 	#endif
 
 	Options* options;
 	int idCounter;
-	//static bool loaded;
 	Random random;
-	//int noMusicDelay = random.nextInt(20 * 60 * 10);
 	float _x;
 	float _y;
 	float _z;
@@ -65,4 +69,4 @@ private:
 	Minecraft* mc;
 };
 
-#endif /*NET_MINECRAFT_CLIENT_SOUND__SoundEngine_H__*/
+#endif

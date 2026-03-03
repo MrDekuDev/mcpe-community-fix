@@ -74,6 +74,7 @@ public:
 	static const int KEY_ESCAPE = 27;
 	static const int KEY_SPACE = 32;
 	static const int KEY_LSHIFT = 10;
+	static const int KEY_LALT = 18;
 
 	static bool isKeyDown(int keyCode) {
 		return _states[keyCode] == KeyboardAction::KEYDOWN;

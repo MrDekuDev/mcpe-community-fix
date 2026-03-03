@@ -17,13 +17,17 @@
 #include <process.h>
 
 #include <cstdio>
+#include <string>
 #include "platform/input/Mouse.h"
 #include "platform/input/Multitouch.h"
+#include "platform/input/Keyboard.h"
 #include "util/Mth.h"
 #include "AppPlatform_win32.h"
 
 static App* g_app = 0;
 static volatile bool g_running = true;
+static int lastX = 0;
+static int lastY = 0;
 
 static int getBits(int bits, int startBitInclusive, int endBitExclusive, int shiftTruncate) {
 	int sum = 0;
@@ -70,8 +74,14 @@ LRESULT WINAPI windowProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		if (wParam == 33) toggleResolutions(hWnd, -1);
 		if (wParam == 34) toggleResolutions(hWnd, +1);
 		
+		// Handle special keys
+		unsigned char keyCode = (unsigned char)wParam;
+		if (wParam == 16) keyCode = Keyboard::KEY_LSHIFT; // VK_LSHIFT is 16
+		if (wParam == 160) keyCode = Keyboard::KEY_LSHIFT; // VK_LSHIFT is also 160 for extended key
+		if (wParam == 161) keyCode = Keyboard::KEY_LSHIFT; // VK_RSHIFT is 161
+		
 		//if (wParam == 'Q') ((Minecraft*)g_app)->leaveGame();
-		Keyboard::feed((unsigned char) wParam, 1); //(unsigned char) getBits(lParam, 16, 23, 1)
+		Keyboard::feed(keyCode, 1); //(unsigned char) getBits(lParam, 16, 23, 1)
 
 		//char* lParamConv = (char*) &lParam;
 		//int convertResult =  ToUnicode(wParam, lParamConv[1], )
@@ -79,7 +89,13 @@ LRESULT WINAPI windowProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		return 0;
 	}
 	case WM_KEYUP: {
-		Keyboard::feed((unsigned char) wParam, 0); //(unsigned char) getBits(lParam, 16, 23, 1)
+		// Handle special keys
+		unsigned char keyCode = (unsigned char)wParam;
+		if (wParam == 16) keyCode = Keyboard::KEY_LSHIFT; // VK_LSHIFT is 16
+		if (wParam == 160) keyCode = Keyboard::KEY_LSHIFT; // VK_LSHIFT is also 160 for extended key
+		if (wParam == 161) keyCode = Keyboard::KEY_LSHIFT; // VK_RSHIFT is 161
+		
+		Keyboard::feed(keyCode, 0); //(unsigned char) getBits(lParam, 16, 23, 1)
 		return 0;
 	}
 	case WM_CHAR: {
@@ -107,8 +123,22 @@ LRESULT WINAPI windowProc ( HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam )
 		break;
 	}
 	case WM_MOUSEMOVE: {
-		Mouse::feed( MouseAction::ACTION_MOVE, 0, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		Multitouch::feed(0, 0, GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), 0);
+		int x = GET_X_LPARAM(lParam);
+		int y = GET_Y_LPARAM(lParam);
+		int dx = x - lastX;
+		int dy = y - lastY;
+		lastX = x;
+		lastY = y;
+		Mouse::feed( MouseAction::ACTION_MOVE, 0, x, y, (short)dx, (short)dy);
+		Multitouch::feed(0, 0, x, y, 0);
+		break;
+	}
+	case WM_MOUSEWHEEL: {
+		// Use current mouse position to avoid affecting view rotation
+		int delta = GET_WHEEL_DELTA_WPARAM(wParam);
+		// Convert wheel delta to a direction: positive for up, negative for down
+		int wheelDirection = (delta > 0) ? 1 : -1;
+		Mouse::feed( MouseAction::ACTION_WHEEL, wheelDirection, lastX, lastY);
 		break;
 	}
 	default:
@@ -270,8 +300,18 @@ int main(void) {
 	App* app = new MAIN_CLASS();
 
 	g_app = app;
-	((MAIN_CLASS*)g_app)->externalStoragePath = ".";
-	((MAIN_CLASS*)g_app)->externalCacheStoragePath = ".";
+	
+	char exePath[MAX_PATH];
+	GetModuleFileNameA(NULL, exePath, MAX_PATH);
+	std::string exeDir = std::string(exePath);
+	size_t lastSlash = exeDir.find_last_of("\\/");
+	if (lastSlash != std::string::npos) {
+		exeDir = exeDir.substr(0, lastSlash);
+	}
+	
+	((MAIN_CLASS*)g_app)->externalStoragePath = exeDir;
+	((MAIN_CLASS*)g_app)->externalCacheStoragePath = exeDir;
+	AppPlatform_win32::setDataPath(exeDir + "/data");
 	g_app->init(appContext);
 	g_app->setSize(appContext.platform->getScreenWidth(), appContext.platform->getScreenHeight());
 

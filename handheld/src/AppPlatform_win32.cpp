@@ -1,6 +1,8 @@
 #include "AppPlatform_win32.h"
 #include "util/Mth.h"
 
+std::string AppPlatform_win32::s_dataPath = "data";
+
 int AppPlatform_win32::getScreenWidth()  { return 854; }
 int AppPlatform_win32::getScreenHeight() { return 480; }
 
@@ -13,5 +15,5 @@ float AppPlatform_win32::getPixelsPerMillimeter() {
 	return pixels / mm;
 }
 
-bool AppPlatform_win32::supportsTouchscreen()  { return true; }
+bool AppPlatform_win32::supportsTouchscreen()  { return false; }
 bool AppPlatform_win32::hasBuyButtonWhenInvalidLicense() { return true; }

@@ -212,7 +212,7 @@ void Gui::handleKeyPressed(int key)
 			minecraft->player->inventory->selected++;
 		}
 	}
-	else if (key == 100)
+	else if (key == 100 || key == 69) // 69 is KEY_E
 	{
 		minecraft->screenChooser.setScreen(SCREEN_BLOCKSELECTION);
 	}

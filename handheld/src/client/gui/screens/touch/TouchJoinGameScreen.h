@@ -5,6 +5,7 @@
 #include "../../components/Button.h"
 #include "../../components/SmallButton.h"
 #include "../../components/RolledSelectionListV.h"
+#include "../../components/TextBox.h"
 #include "../../../Minecraft.h"
 #include "../../../../platform/input/Multitouch.h"
 #include "../../../../network/RakNetInstance.h"
@@ -23,7 +24,7 @@ class AvailableGamesList : public RolledSelectionListV
 
 public:
 	AvailableGamesList(Minecraft* _minecraft, int _width, int _height)
-	:	RolledSelectionListV(_minecraft, _width, _height, 0, _width, 24, _height, 34),
+	:	RolledSelectionListV(_minecraft, _width, _height, 0, _width, 24, _height, 80),
 		selectedItem(-1),
 		startSelected(-1)
 	{
@@ -62,13 +63,20 @@ public:
 	void buttonClicked(Button* button);
 
 	bool isInGameScreen();
+	
+	void keyPressed(int key);
+	void keyboardNewChar(char inputChar);
+	void mouseClicked(int x, int y, int buttonNum);
+
 private:
 	Button bJoin;
 	TButton bBack;
 	THeader bHeader;
+	Button bConnect;
 	AvailableGamesList* gamesList;
+	TextBox* ipTextBox;
 };
 
 };
 
-#endif /*NET_MINECRAFT_CLIENT_GUI_SCREENS_TOUCH__TouchJoinGameScreen_H__*/
+#endif

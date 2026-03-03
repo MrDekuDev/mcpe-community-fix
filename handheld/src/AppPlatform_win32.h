@@ -17,12 +17,19 @@ static void png_funcReadFile(png_structp pngPtr, png_bytep data, png_size_t leng
 class AppPlatform_win32: public AppPlatform
 {
 public:
+	static std::string s_dataPath;
+
     AppPlatform_win32()
     {
     }
 
+	static void setDataPath(const std::string& path) {
+		s_dataPath = path;
+	}
+
 	BinaryBlob readAssetFile(const std::string& filename) {
-		FILE* fp = fopen(("../../data/" + filename).c_str(), "r");
+		std::string fullPath = s_dataPath + "/" + filename;
+		FILE* fp = fopen(fullPath.c_str(), "rb");
 		if (!fp)
 			return BinaryBlob();
 
@@ -39,7 +46,6 @@ public:
 	}
 
     void saveScreenshot(const std::string& filename, int glWidth, int glHeight) {
-        //@todo
     }
 
     __inline unsigned int rgbToBgr(unsigned int p) {
@@ -50,8 +56,7 @@ public:
 	{
 		TextureData out;
 
-		std::string filename = textureFolder? "../../data/images/" + filename_
-											: filename_;
+		std::string filename = textureFolder ? s_dataPath + "/images/" + filename_ : filename_;
 		std::ifstream source(filename.c_str(), std::ios::binary);
 
 		if (source) {
@@ -67,12 +72,10 @@ public:
 				return out;
 			}
 
-			// Hack to get around the broken libpng for windows
 			png_set_read_fn(pngPtr,(voidp)&source, png_funcReadFile);
 
 			png_read_info(pngPtr, infoPtr);
 
-			// Set up the texdata properties
 			out.w = png_get_image_width(pngPtr, infoPtr);
 			out.h = png_get_image_height(pngPtr, infoPtr);
 
@@ -86,7 +89,6 @@ public:
 			}
 			png_read_image(pngPtr, rowPtrs);
 
-			// Teardown and return
 			png_destroy_read_struct(&pngPtr, &infoPtr,(png_infopp)0);
 			delete[] (png_bytep)rowPtrs;
 			source.close();
@@ -107,10 +109,9 @@ public:
 	}
 
 	virtual int checkLicense() {
-		static int _z = 0;//20;
+		static int _z = 0;
 		_z--;
 		if (_z < 0) return 0;
-		//if (_z < 0) return 107;
 		return -2;
 	}
 
@@ -125,4 +126,4 @@ public:
 private:
 };
 
-#endif /*APPPLATFORM_WIN32_H__*/
+#endif

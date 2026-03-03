@@ -1,6 +1,8 @@
 #include "KeyboardInput.h"
 #include "../../Options.h"
 #include "../../../world/entity/player/Player.h"
+#include "../../../world/entity/player/Inventory.h"
+#include "../../player/LocalPlayer.h"
 
 KeyboardInput::KeyboardInput( Options* options )
 {
@@ -19,6 +21,8 @@ void KeyboardInput::setKey( int key, bool state )
 	if (key == options->keyJump.key) id = KEY_JUMP;
 	if (key == options->keySneak.key) id = KEY_SNEAK;
 	if (key == options->keyCraft.key) id = KEY_CRAFT;
+	if (key == options->keyDrop.key) id = KEY_DROP;
+	if (key == options->keyBuild.key) id = KEY_BUILD;
 	//printf("key: %d\n", id);
 	if (id >= 0) {
 		keys[id] = state;
@@ -52,13 +56,30 @@ void KeyboardInput::tick( Player* player )
 		ya *= 0.3f;
 	}
 
-	#ifdef RPI
-		wantUp = jumping;
-		wantDown = sneaking;
-	#endif
+	// Set wantUp and wantDown for flight control
+	wantUp = jumping;
+	wantDown = sneaking;
 
 	if (keys[KEY_CRAFT])
 		player->startCrafting((int)player->x, (int)player->y, (int)player->z, Recipe::SIZE_2X2);
+
+	if (keys[KEY_DROP]) {
+		ItemInstance* item = player->inventory->getSelected();
+		if (item && !item->isNull()) {
+			ItemInstance* dropItem = new ItemInstance(*item);
+			dropItem->count = 1;
+			item->count--;
+			if (item->count <= 0) {
+				player->inventory->clearSlot(player->inventory->selected);
+			}
+			player->drop(dropItem);
+		}
+	}
+
+	if (keys[KEY_BUILD]) {
+		// Open inventory/backpack
+		// This will be handled in Minecraft's keyboard processing
+	}
 
 	//printf("\n>- %f %f\n", xa, ya);
 }

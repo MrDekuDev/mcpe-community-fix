@@ -665,7 +665,7 @@ void Minecraft::tickInput() {
 		if (e.action == MouseAction::ACTION_WHEEL) {
 			Inventory* v = player->inventory;
 			int numSlots = gui.getNumSlots() - 1;
-			int slot = (v->selected - e.dy + numSlots) % numSlots;
+			int slot = (v->selected - e.data + numSlots) % numSlots;
 			v->selectSlot(slot);
 		}
 		/*
@@ -736,6 +736,14 @@ void Minecraft::tickInput() {
 					for (int i = 0; i < 16; ++i)
 						printf("%d\t%f\n", i, noise.grad2(i, 3, 8));
 					*/
+				}
+
+				if (key == Keyboard::KEY_LALT) {
+					if (isPressed) {
+						releaseMouse();
+					} else {
+						grabMouse();
+					}
 				}
 
 				if (key == Keyboard::KEY_O) {
@@ -1103,7 +1111,8 @@ void Minecraft::grabMouse()
 #ifndef STANDALONE_SERVER
 	if (mouseGrabbed) return;
 	mouseGrabbed = true;
-	mouseHandler.grab();
+	// Don't hide cursor if useTouchScreen is enabled
+	mouseHandler.grab(!options.useTouchScreen);
 	//setScreen(NULL);
 #endif
 }
@@ -1134,11 +1143,10 @@ bool Minecraft::supportNonTouchScreen() {
 void Minecraft::init()
 {
 	options.minecraft = this;
+	_supportsNonTouchscreen = !platform()->supportsTouchscreen();
 	options.initDefaultValues();
 #ifndef STANDALONE_SERVER
 	checkGlError("Init enter");
-
-	_supportsNonTouchscreen = !platform()->supportsTouchscreen();
 
 	LOGI("IS TOUCHSCREEN? %d\n", options.useTouchScreen);
 

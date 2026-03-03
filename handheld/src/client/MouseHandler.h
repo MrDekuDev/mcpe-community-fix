@@ -14,7 +14,7 @@ public:
 
 	void setTurnInput(ITurnInput* turnInput);
 
-    void grab();
+    void grab(bool hideCursor = true);
     void release();
 
     void poll();

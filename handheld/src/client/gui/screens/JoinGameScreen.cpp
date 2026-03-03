@@ -3,19 +3,22 @@
 #include "ProgressScreen.h"
 #include "../Font.h"
 #include "../../../network/RakNetInstance.h"
+#include <cstdlib>
 
 JoinGameScreen::JoinGameScreen()
 :	bJoin(  2, "Join Game"),
 	bBack(  3, "Back"),
-	gamesList(NULL)
+	bConnect(4, "Connect"),
+	gamesList(NULL),
+	ipTextBox(NULL)
 {
 	bJoin.active = false;
-	//gamesList->yInertia = 0.5f;
 }
 
 JoinGameScreen::~JoinGameScreen()
 {
 	delete gamesList;
+	delete ipTextBox;
 }
 
 void JoinGameScreen::buttonClicked(Button* button)
@@ -32,8 +35,34 @@ void JoinGameScreen::buttonClicked(Button* button)
 				minecraft->setScreen(new ProgressScreen());
 			}
 		}
-		//minecraft->locateMultiplayer();
-		//minecraft->setScreen(new JoinGameScreen());
+	}
+	if (button->id == bConnect.id)
+	{
+		if (ipTextBox && ipTextBox->text.length() > 0)
+		{
+			std::string ipText = ipTextBox->text;
+			std::string ip = ipText;
+			int port = 19132;
+			
+			size_t colonPos = ipText.find(':');
+			if (colonPos != std::string::npos)
+			{
+				ip = ipText.substr(0, colonPos);
+				port = atoi(ipText.substr(colonPos + 1).c_str());
+				if (port <= 0) port = 19132;
+			}
+			
+			PingedCompatibleServer manualServer;
+			manualServer.address.FromStringExplicitPort(ip.c_str(), port);
+			manualServer.name = ipText.c_str();
+			manualServer.isSpecial = false;
+			
+			minecraft->joinMultiplayer(manualServer);
+			bJoin.active = false;
+			bBack.active = false;
+			bConnect.active = false;
+			minecraft->setScreen(new ProgressScreen());
+		}
 	}
 	if (button->id == bBack.id)
 	{
@@ -68,7 +97,6 @@ void JoinGameScreen::tick()
 
 	if (serverList.size() != gamesList->copiedServerList.size())
 	{
-		// copy the currently selected item
 		PingedCompatibleServer selectedServer;
 		bool hasSelection = false;
 		if (isIndexValid(gamesList->selectedItem))
@@ -80,7 +108,6 @@ void JoinGameScreen::tick()
 		gamesList->copiedServerList = serverList;
 		gamesList->selectItem(-1, false);
 
-		// re-select previous item if it still exists
 		if (hasSelection)
 		{
 			for (unsigned int i = 0; i < gamesList->copiedServerList.size(); i++)
@@ -107,29 +134,97 @@ void JoinGameScreen::init()
 {
 	buttons.push_back(&bJoin);
 	buttons.push_back(&bBack);
+	buttons.push_back(&bConnect);
 
 	minecraft->raknetInstance->clearServerList();
 	gamesList = new AvailableGamesList(minecraft, width, height);
+	
+	ipTextBox = new TextBox(100, 0, 0, 200, 20, "");
+	textBoxes.push_back(ipTextBox);
 
 #ifdef ANDROID
 	tabButtons.push_back(&bJoin);
 	tabButtons.push_back(&bBack);
+	tabButtons.push_back(&bConnect);
 #endif
 }
 
 void JoinGameScreen::setupPositions() {
 	int yBase = height - 26;
 
-	//#ifdef ANDROID
-	bJoin.y =	yBase;
-	bBack.y =   yBase;
+	bJoin.y = yBase;
+	bBack.y = yBase;
+	bConnect.y = yBase;
 
-	bBack.width = bJoin.width = 120;
-	//#endif
+	bBack.width = bJoin.width = bConnect.width = 90;
 
-	// Center buttons
-	bJoin.x = width / 2 - 4 - bJoin.width;
-	bBack.x = width / 2 + 4;
+	int totalWidth = bJoin.width + bConnect.width + bBack.width + 12; // 4px spacing between buttons
+	int startX = (width - totalWidth) / 2;
+	
+	bJoin.x = startX;
+	bConnect.x = startX + bJoin.width + 4;
+	bBack.x = startX + bJoin.width + bConnect.width + 8;
+	
+	if (ipTextBox)
+	{
+		ipTextBox->x = width / 2 - 100;
+		ipTextBox->y = height - 56;
+		ipTextBox->w = 200;
+		ipTextBox->h = 20;
+	}
+}
+
+void JoinGameScreen::keyPressed(int key)
+{
+	if (ipTextBox && ipTextBox->focused)
+	{
+		if (key == 8)
+		{
+			if (ipTextBox->text.length() > 0)
+				ipTextBox->text.erase(ipTextBox->text.length() - 1);
+			return;
+		}
+		else if (key == 13)
+		{
+			buttonClicked(&bConnect);
+			return;
+		}
+	}
+	Screen::keyPressed(key);
+}
+
+void JoinGameScreen::keyboardNewChar(char inputChar)
+{
+	if (ipTextBox && ipTextBox->focused)
+	{
+		if ((inputChar >= '0' && inputChar <= '9') || 
+		    inputChar == '.' || inputChar == ':' || 
+		    (inputChar >= 'a' && inputChar <= 'z') || 
+		    (inputChar >= 'A' && inputChar <= 'Z'))
+		{
+			ipTextBox->text += inputChar;
+		}
+		return;
+	}
+	Screen::keyboardNewChar(inputChar);
+}
+
+void JoinGameScreen::mouseClicked(int x, int y, int buttonNum)
+{
+	if (ipTextBox)
+	{
+		bool inBox = x >= ipTextBox->x && x < ipTextBox->x + ipTextBox->w &&
+		             y >= ipTextBox->y && y < ipTextBox->y + ipTextBox->h;
+		if (inBox)
+		{
+			ipTextBox->setFocus(minecraft);
+		}
+		else
+		{
+			ipTextBox->loseFocus(minecraft);
+		}
+	}
+	Screen::mouseClicked(x, y, buttonNum);
 }
 
 void JoinGameScreen::render( int xm, int ym, float a )
@@ -157,6 +252,10 @@ void JoinGameScreen::render( int xm, int ym, float a )
 		static const char* spinnerTexts[] = {"-", "\\", "|", "/"};
 		int n = ((int)(5.5f * getTimeS()) % 4);
 		drawCenteredString(minecraft->font, spinnerTexts[n], spinnerX, 8, 0xffffffff);
+		
+		drawString(minecraft->font, "Or enter IP:port:", ipTextBox->x, ipTextBox->y - 12, 0xffaaaaaa);
+		if (ipTextBox)
+			ipTextBox->render(minecraft, xm, ym);
 	} else {
 		std::string s = "WiFi is disabled";
 		const int yy = height / 2 - 8;

@@ -5,6 +5,10 @@
 //#define NO_STORAGE
 #endif
 
+#ifdef WIN32
+#include <windows.h>
+#endif
+
 #include <errno.h>
 
 #include "platform/input/Mouse.h"
@@ -154,6 +158,10 @@ void NinecraftApp::update()
 
 	swapBuffers();
 	Mouse::reset2();
+
+#ifdef WIN32
+	// No need to reset mouse position every frame - let Windows handle it
+#endif
 
     // Restart the server if (our modded) RakNet reports an error
     if (level && raknetInstance->isProbablyBroken() && raknetInstance->isServer()) {
