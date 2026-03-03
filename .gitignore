@@ -1,6 +1,10 @@
-# macOS yucky DS Store files
-.DS_Store
+# Visual Studio
+*.vcxproj.user
+.vs/
 
-# Xcode user data
-xcuserdata/
-*.xcuserstate
+# Build
+dist/
+*.o
+*.obj
+*.a
+*.exe
