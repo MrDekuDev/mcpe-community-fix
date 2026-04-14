@@ -49,7 +49,7 @@ LocalPlayer::LocalPlayer(Minecraft* minecraft, Level* level, User* user, int dim
 	input(NULL),
 	sentInventoryItemId(-1),
 	sentInventoryItemData(-1),
-	autoJumpEnabled(true),
+	autoJumpEnabled(false),
 	armorTypeHash(0)
 {
 	this->dimension = dimension;
@@ -149,7 +149,7 @@ void LocalPlayer::tick() {
 
         printf("armor %d: %d\n", i, a->getAuxValue());
     }
-/**/
+*/
 
 	updateArmorTypeHash();
 #ifndef STANDALONE_SERVER

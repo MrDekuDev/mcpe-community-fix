@@ -14,13 +14,13 @@ void Options::initDefaultValues() {
 	thirdPersonView = false;
 	renderDebug = false;
 	isFlying = false;
-	smoothCamera = true;
+	smoothCamera = false;
 	fixedCamera = false;
 	flySpeed = 1;
 	cameraSpeed = 1;
 	guiScale = 0;
 
-	useMouseForDigging = false;
+	useMouseForDigging = true;
 	destroyVibration = true;
 	isLeftHanded = false;
 
@@ -28,14 +28,14 @@ void Options::initDefaultValues() {
 
 	music = 1;
 	sound = 1;
-	sensitivity = 0.5f;
+	sensitivity = 0.25f;
 	invertYMouse = false;
-	viewDistance = 2;
+	viewDistance = 16;
 	bobView = true;
 	anaglyph3d = false;
 	limitFramerate = false;
 	fancyGraphics = true;//false;
-	ambientOcclusion = false;
+	ambientOcclusion = true;
 	if(minecraft->supportNonTouchScreen())
 		useTouchScreen = false;
 	else
