@@ -56,18 +56,32 @@ int main(int numArguments, char* pszArgs[]) {
 	LevelSettings settings(getEpochTimeS(), GameType::Creative);
 	float startTime = getTimeS();
 	((MAIN_CLASS*)g_app)->selectLevel(aSettings.getLevelDir(), aSettings.getLevelName(),  settings);
-	((MAIN_CLASS*)g_app)->hostMultiplayer(aSettings.getPort());
+	
+	if (((MAIN_CLASS*)g_app)->hostMultiplayer(aSettings.getPort())) {
+		printf("Server started on port %d\n", aSettings.getPort());
+	} else {
+		printf("Failed to start server on port %d (Is another server running?)\n", aSettings.getPort());
+		return 1;
+	}
 
-	std::cout << "Level has been generated in " << getTimeS() - startTime << std::endl;
+	std::cout << "Level has been generated in " << getTimeS() - startTime << " seconds" << std::endl;
 	((MAIN_CLASS*)g_app)->level->saveLevelData();
 	std::cout << "Level has been saved!" << std::endl;
+	
+	printf("Server is running. Press Ctrl+C to stop.\n");
+
 	while(!app->wantToQuit()) {
 		app->update();
-		//pthread_yield();
-		sleep(20);
+		usleep(10000); // 10ms sleep to keep CPU usage low while maintaining responsiveness (100 TPS)
 	}
-	((MAIN_CLASS*)g_app)->level->saveLevelData();
+	
+	printf("Server shutting down...\n");
+	if (((MAIN_CLASS*)g_app)->level) {
+		((MAIN_CLASS*)g_app)->level->saveLevelData();
+		std::cout << "Final level save complete." << std::endl;
+	}
 	delete app;
+
 	appContext.platform->finish();
 	delete appContext.platform;
 	std::cout << "Quit correctly" << std::endl;
