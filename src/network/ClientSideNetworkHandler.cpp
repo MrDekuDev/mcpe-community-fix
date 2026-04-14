@@ -157,6 +157,7 @@ void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, StartGam
 	level->isClientSide = true;
 
 	bool isCreative = (packet->gameType == GameType::Creative);
+#ifndef STANDALONE_SERVER
 	LocalPlayer* player = new LocalPlayer(minecraft, level, minecraft->user, level->dimension->id, isCreative);
 	player->owner = rakPeer->GetMyGUID();
 	player->entityId = packet->entityId;
@@ -165,6 +166,7 @@ void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, StartGam
 	LOGI("new pos: %f, %f [%f - %f]\n", player->x, player->z, player->bb.y0, player->bb.y1);
 
 	minecraft->setLevel(level, "ClientSideNetworkHandler -> setLevel", player);
+#endif
 	minecraft->setIsCreativeMode(isCreative);
 }
 
@@ -269,6 +271,7 @@ void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, AddPlaye
 	}
 	LOGI("AddPlayerPacket\n");
 
+#ifndef STANDALONE_SERVER
 	Player* player = new RemotePlayer(level, minecraft->isCreativeMode());
 	minecraft->gameMode->initAbilities(player->abilities);
 	player->entityId = packet->entityId;
@@ -287,6 +290,7 @@ void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, AddPlaye
     }
     player->inventory->moveToSelectedSlot(slot, true);
 	//player->resetPos();
+#endif
 
 	std::string message = packet->name.C_String();
 	message += " joined the game";
@@ -790,7 +794,9 @@ void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, SetHealt
 	if (!level || !minecraft->player)
 		return;
 
+#ifndef STANDALONE_SERVER
 	minecraft->player->hurtTo(packet->health);
+#endif
 }
 
 void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, SetSpawnPositionPacket* packet) {
@@ -825,23 +831,29 @@ void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, Containe
 	if (packet->type == ContainerType::FURNACE) {
 		FurnaceTileEntity* te = new FurnaceTileEntity();
 		te->clientSideOnly = true;
+#ifndef STANDALONE_SERVER
 		minecraft->player->openFurnace(te);
 		if (minecraft->player->containerMenu)
 			minecraft->player->containerMenu->containerId = packet->containerId;
+#endif
 	}
 	if (packet->type == ContainerType::CONTAINER) {
 		ChestTileEntity* te = new ChestTileEntity();
 		te->clientSideOnly = true;
+#ifndef STANDALONE_SERVER
 		minecraft->player->openContainer(te);
 		if (minecraft->player->containerMenu)
 			minecraft->player->containerMenu->containerId = packet->containerId;
+#endif
 	}
 }
 
 void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, ContainerClosePacket* packet)
 {
+#ifndef STANDALONE_SERVER
 	if (minecraft && minecraft->player && minecraft->player->containerMenu)
 		minecraft->player->closeContainer();
+#endif
 }
 
 void ClientSideNetworkHandler::handle(const RakNet::RakNetGUID& source, ContainerSetContentPacket* packet)

@@ -272,7 +272,9 @@ void Minecraft::setLevel(Level* level, const std::string& message /* ="" */, Loc
 
 	if (level != NULL) {
 		level->raknetInstance = raknetInstance;
+#ifndef STANDALONE_SERVER
         gameMode->initLevel(level);
+#endif
 
 		if (!player && forceInsertPlayer)
 		{
@@ -516,7 +518,9 @@ void Minecraft::tick(int nTick, int maxTick) {
 #endif
 	TIMER_PUSH("gameMode");
 	if (level && !pause) {
+#ifndef STANDALONE_SERVER
 		gameMode->tick();
+#endif
 	}
 
 	TIMER_POP_PUSH("commandServer");
@@ -1302,7 +1306,7 @@ bool Minecraft::joinMultiplayer( const PingedCompatibleServer& server )
 	return false;
 }
 
-void Minecraft::hostMultiplayer(int port) {
+bool Minecraft::hostMultiplayer(int port) {
     // Tear down last instance
     raknetInstance->disconnect();
     delete netCallback;
@@ -1311,12 +1315,15 @@ void Minecraft::hostMultiplayer(int port) {
 #if !defined(NO_NETWORK)
 	netCallback = new ServerSideNetworkHandler(this, raknetInstance);
     #ifdef STANDALONE_SERVER
-        raknetInstance->host(user->name, port, 16);
+        return raknetInstance->host(user->name, port, 16);
     #else
-        raknetInstance->host(user->name, port);
+        return raknetInstance->host(user->name, port);
     #endif
+#else
+    return false;
 #endif
 }
+
 
 //
 // Level generation
@@ -1488,21 +1495,25 @@ void Minecraft::audioEngineOff() {
 
 void Minecraft::setIsCreativeMode(bool isCreative)
 {
-#ifdef CREATORMODE
-	delete gameMode;
-	gameMode = new CreatorMode(this);
-	_isCreativeMode = true;
-#else
-	if (!gameMode || isCreative != _isCreativeMode)
-	{
+#ifndef STANDALONE_SERVER
+	#ifdef CREATORMODE
 		delete gameMode;
-		if (isCreative) gameMode = new CreativeMode(this);
-		else			gameMode = new SurvivalMode(this);
-		_isCreativeMode = isCreative;
-	}
+		gameMode = new CreatorMode(this);
+		_isCreativeMode = true;
+	#else
+		if (!gameMode || isCreative != _isCreativeMode)
+		{
+			delete gameMode;
+			if (isCreative) gameMode = new CreativeMode(this);
+			else			gameMode = new SurvivalMode(this);
+			_isCreativeMode = isCreative;
+		}
+	#endif
+		if (player)
+			gameMode->initAbilities(player->abilities);
+#else
+	_isCreativeMode = isCreative;
 #endif
-	if (player)
-		gameMode->initAbilities(player->abilities);
 }
 
 bool Minecraft::isCreativeMode() {

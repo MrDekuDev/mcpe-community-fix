@@ -80,7 +80,7 @@ public:
 	void locateMultiplayer();
 	void cancelLocateMultiplayer();
 	bool joinMultiplayer(const PingedCompatibleServer& server);
-	void hostMultiplayer(int port=19132);
+	bool hostMultiplayer(int port=19132);
 	Player* respawnPlayer(int playerId);
 	void respawnPlayer();
 	void resetPlayer(Player* player);

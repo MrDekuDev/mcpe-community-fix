@@ -155,13 +155,15 @@ void NinecraftApp::update()
 #endif /*ANDROID_PUBLISH*/
 
 	Minecraft::update();
-
+#ifndef STANDALONE_SERVER
 	swapBuffers();
 	Mouse::reset2();
 
 #ifdef WIN32
 	// No need to reset mouse position every frame - let Windows handle it
 #endif
+#endif
+
 
     // Restart the server if (our modded) RakNet reports an error
     if (level && raknetInstance->isProbablyBroken() && raknetInstance->isServer()) {
@@ -290,7 +292,9 @@ bool NinecraftApp::handleBack(bool isDown)
 			{
 				if (!screen->handleBackEvent(isDown))
 				{
+#ifndef STANDALONE_SERVER
 					if (player->containerMenu) player->closeContainer();
+#endif
 					setScreen(NULL);
 				}
 				return true;
