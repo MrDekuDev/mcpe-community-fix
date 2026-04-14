@@ -30,7 +30,7 @@ void Options::initDefaultValues() {
 	sound = 1;
 	sensitivity = 0.25f;
 	invertYMouse = false;
-	viewDistance = 16;
+	viewDistance = 2;
 	bobView = true;
 	anaglyph3d = false;
 	limitFramerate = false;
