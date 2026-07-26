@@ -212,6 +212,12 @@ public:
 		if(item == &Option::DIFFICULTY) {
 			difficulty = value;
 		}
+		if(item == &Option::RENDER_DISTANCE) {
+			viewDistance = value;
+		}
+		if(item == &Option::GUI_SCALE) {
+			guiScale = value;
+		}
 		notifyOptionUpdate(item, value);
 	}
 
@@ -247,6 +253,8 @@ public:
 
 	int getIntValue(const Option* item) {
 		if(item == &Option::DIFFICULTY) return difficulty;
+		if(item == &Option::RENDER_DISTANCE) return viewDistance;
+		if(item == &Option::GUI_SCALE) return guiScale;
 		return 0;
 	}
 
@@ -269,6 +277,8 @@ public:
             return limitFramerate;
         if (item == &Option::AMBIENT_OCCLUSION)
             return ambientOcclusion;
+        if (item == &Option::GRAPHICS)
+            return fancyGraphics;
         if (item == &Option::THIRD_PERSON)
             return thirdPersonView;
         if (item == &Option::HIDE_GUI)

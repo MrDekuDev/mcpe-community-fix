@@ -151,7 +151,8 @@ void OptionsScreen::generateOptionScreens() {
 
 	// Graphics Pane
 	optionPanes[3]->createOptionsGroup("Graphics");
-	optionPanes[3]->createProgressSlider(minecraft, 0, "GUI Scale", &Options::Option::GUI_SCALE, 0.0f, 3.0f);
+	optionPanes[3]->createStepSlider(minecraft, 0, "Render Distance", &Options::Option::RENDER_DISTANCE, std::vector<int>{0, 1, 2, 3});
+	optionPanes[3]->createStepSlider(minecraft, 0, "GUI Scale", &Options::Option::GUI_SCALE, std::vector<int>{0, 1, 2, 3});
 	optionPanes[3]->createToggle(0, "Fancy graphics", &Options::Option::GRAPHICS);
 	optionPanes[3]->createToggle(0, "Ambient occlusion", &Options::Option::AMBIENT_OCCLUSION);
 	optionPanes[3]->createToggle(0, "View bobbing", &Options::Option::VIEW_BOBBING);
