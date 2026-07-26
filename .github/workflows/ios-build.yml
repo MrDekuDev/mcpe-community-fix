@@ -1,0 +1,46 @@
+# Builds the iOS (arm64) target and packages an unsigned .ipa as a downloadable artifact.
+name: iOS Build
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "arm64-build" ]
+
+jobs:
+  build-ios:
+    runs-on: macos-14
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Show available schemes (debug helper)
+        working-directory: handheld/project/iosproj
+        run: xcodebuild -list -project minecraftpe.xcodeproj
+
+      - name: Build (unsigned)
+        working-directory: handheld/project/iosproj
+        run: |
+          xcodebuild -project minecraftpe.xcodeproj \
+            -scheme minecraftpe \
+            -sdk iphoneos \
+            -configuration Release \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            -derivedDataPath build \
+            build
+
+      - name: Package IPA
+        working-directory: handheld/project/iosproj
+        run: |
+          mkdir -p Payload
+          APP_PATH=$(find build/Build/Products -maxdepth 2 -iname "*.app" | head -n 1)
+          echo "Found app bundle: $APP_PATH"
+          cp -R "$APP_PATH" Payload/
+          zip -r -q minecraftpe.ipa Payload
+
+      - name: Upload IPA artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: minecraftpe-ios-unsigned
+          path: handheld/project/iosproj/minecraftpe.ipa
